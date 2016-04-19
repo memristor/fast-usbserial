@@ -62,16 +62,20 @@
 # 	Since the ATMEGA8U2 part is not directly supported by the current
 #	versions of either avrdude or dfu-programmer, we specify a dummy
 #	part; AT90USB82 which is close enough in memory size and organization
-MCU = atmega16u2
-MCU_AVRDUDE = m16u2
-MCU_DFU = atmega16u2
+# MCU = atmega16u2
+# MCU_AVRDUDE = m16u2
+# MCU_DFU = atmega16u2
+
+MCU ?= atmega8u2
+MCU_AVRDUDE = $(MCU)
+MCU_DFU = $(MCU)
 
 # Specify the Arduino model using the assigned PID.  This is used by Descriptors.c
 #   to set PID and product descriptor string
 # Uno PID:
-ARDUINO_MODEL_PID = 0x0001
+# ARDUINO_MODEL_PID = 0x0001
 # Mega 2560 PID:
-#ARDUINO_MODEL_PID = 0x0010
+ARDUINO_MODEL_PID = 0x0010
 
 
 # Target board (see library "Board Types" documentation, NONE for projects not requiring
@@ -364,7 +368,9 @@ LDFLAGS += $(PRINTF_LIB) $(SCANF_LIB) $(MATH_LIB)
 # Type: avrdude -c ?
 # to get a full listing.
 #
-AVRDUDE_PROGRAMMER = avrispmkii
+# AVRDUDE_PROGRAMMER ?= avrispmkii
+
+AVRDUDE_PROGRAMMER ?= usbasp
 
 # com1 = serial port. Use lpt1 to connect to parallel port.
 AVRDUDE_PORT = usb
@@ -389,7 +395,7 @@ AVRDUDE_WRITE_FLASH = -U flash:w:$(TARGET).hex
 
 AVRDUDE_FORCE =
 
-AVRDUDE_FLAGS = -p $(MCU_AVRDUDE) -P $(AVRDUDE_PORT) -c $(AVRDUDE_PROGRAMMER)
+AVRDUDE_FLAGS ?= -p $(MCU_AVRDUDE) -P $(AVRDUDE_PORT) -c $(AVRDUDE_PROGRAMMER)
 AVRDUDE_FLAGS += $(AVRDUDE_NO_VERIFY)
 AVRDUDE_FLAGS += $(AVRDUDE_VERBOSE)
 AVRDUDE_FLAGS += $(AVRDUDE_ERASE_COUNTER)
@@ -557,6 +563,9 @@ gccversion :
 
 # Program the device.  
 program: $(TARGET).hex $(TARGET).eep
+	$(AVRDUDE) $(AVRDUDE_FLAGS) $(AVRDUDE_WRITE_FLASH) $(AVRDUDE_WRITE_EEPROM)
+
+program_usbasp: $(TARGET).hex $(TARGET).eep
 	$(AVRDUDE) $(AVRDUDE_FLAGS) $(AVRDUDE_WRITE_FLASH) $(AVRDUDE_WRITE_EEPROM)
 
 flip: $(TARGET).hex
